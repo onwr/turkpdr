@@ -5,6 +5,7 @@ import {
   canDeleteContent,
   requireContentManager,
 } from "@/lib/admin/api-auth";
+import { normalizeMediaUrl } from "@/lib/media-url";
 import { notifyPendingFile } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import {
@@ -146,7 +147,9 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (body.description !== undefined) {
     updateData.description = body.description?.trim() || null;
   }
-  if (body.fileUrl !== undefined) updateData.fileUrl = body.fileUrl.trim();
+  if (body.fileUrl !== undefined) {
+    updateData.fileUrl = normalizeMediaUrl(body.fileUrl.trim()) ?? body.fileUrl.trim();
+  }
   if (body.fileType !== undefined) {
     updateData.fileType = body.fileType?.trim() || null;
   }

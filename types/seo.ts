@@ -1,3 +1,5 @@
+import { normalizeMediaUrl } from "@/lib/media-url";
+
 export type SeoFieldsForm = {
   seoTitle: string;
   seoDescription: string;
@@ -57,7 +59,7 @@ export function seoFieldsToPayload(fields: SeoFieldsForm) {
   return {
     seoTitle: fields.seoTitle.trim() || null,
     seoDescription: fields.seoDescription.trim() || null,
-    ogImage: fields.ogImage.trim() || null,
+    ogImage: normalizeMediaUrl(fields.ogImage.trim()) || null,
     canonicalUrl: fields.canonicalUrl.trim() || null,
     noIndex: fields.noIndex,
   };

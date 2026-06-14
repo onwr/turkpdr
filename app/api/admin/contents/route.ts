@@ -12,6 +12,7 @@ import {
   generateUniqueSlug,
   serializeContent,
   syncContentTags,
+  prepareContentInputForStorage,
   validateContentInput,
   type ContentInput,
 } from "@/lib/admin/content-utils";
@@ -110,6 +111,8 @@ export async function POST(request: Request) {
   if (validationError) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
+
+  body = prepareContentInputForStorage(body);
 
   const slug = await generateUniqueSlug(body.title!.trim());
   const status = body.status ?? "DRAFT";

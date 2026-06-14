@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { getContentEditUrl } from "@/lib/admin/content-display";
+import { normalizeMediaUrl } from "@/lib/media-url";
 import { prisma } from "@/lib/prisma";
 import type { MediaAssetItem, MediaUsageItem } from "@/types/media";
 import type { UploadCategory } from "@/types/upload";
@@ -50,7 +51,7 @@ export async function createMediaAsset(input: CreateMediaInput) {
     data: {
       title: input.title?.trim() || null,
       fileName: input.fileName,
-      fileUrl: input.fileUrl,
+      fileUrl: normalizeMediaUrl(input.fileUrl) ?? input.fileUrl,
       fileType: input.fileType,
       fileSize: input.fileSize,
       category: input.category,

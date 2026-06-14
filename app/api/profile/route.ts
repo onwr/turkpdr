@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentUser } from "@/lib/auth";
+import { normalizeMediaUrl } from "@/lib/media-url";
 import { prisma } from "@/lib/prisma";
 import {
   sanitizeStringList,
@@ -97,9 +98,11 @@ export async function PATCH(request: Request) {
   if (body.name !== undefined) updateData.name = body.name.trim();
   if (body.title !== undefined) updateData.title = body.title?.trim() || null;
   if (body.bio !== undefined) updateData.bio = body.bio?.trim() || null;
-  if (body.avatar !== undefined) updateData.avatar = body.avatar?.trim() || null;
+  if (body.avatar !== undefined) {
+    updateData.avatar = normalizeMediaUrl(body.avatar?.trim()) ?? null;
+  }
   if (body.coverImage !== undefined) {
-    updateData.coverImage = body.coverImage?.trim() || null;
+    updateData.coverImage = normalizeMediaUrl(body.coverImage?.trim()) ?? null;
   }
   if (body.phone !== undefined) updateData.phone = body.phone?.trim() || null;
   if (body.city !== undefined) updateData.city = body.city?.trim() || null;

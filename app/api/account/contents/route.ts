@@ -4,6 +4,7 @@ import {
   generateUniqueSlug,
   isRichContentEmpty,
   syncContentTags,
+  prepareContentInputForStorage,
   validateContentInput,
 } from "@/lib/admin/content-utils";
 import { requireAuth } from "@/lib/api/auth";
@@ -85,6 +86,8 @@ export async function POST(request: Request) {
     );
   }
 
+  body = prepareContentInputForStorage(body);
+
   if (body.categoryId) {
     const category = await prisma.category.findFirst({
       where: { id: body.categoryId, type: "ARTICLE" },
@@ -106,8 +109,8 @@ export async function POST(request: Request) {
       title: body.title!.trim(),
       slug,
       summary: body.summary?.trim() || null,
-      content: body.content!.trim(),
-      coverImage: body.coverImage?.trim() || null,
+      content: body.content?.trim() || null,
+      coverImage: body.coverImage,
       type: "ARTICLE",
       status: "PENDING",
       authorId: auth.user.id,

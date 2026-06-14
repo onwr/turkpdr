@@ -8,6 +8,7 @@ import {
   buildPaginationMeta,
   parsePagination,
 } from "@/lib/admin/pagination";
+import { normalizeMediaUrl } from "@/lib/media-url";
 import { notifyPendingFile } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import {
@@ -161,7 +162,7 @@ export async function POST(request: Request) {
     data: {
       title: body.title!.trim(),
       description: body.description?.trim() || null,
-      fileUrl: body.fileUrl!.trim(),
+      fileUrl: normalizeMediaUrl(body.fileUrl!.trim()) ?? body.fileUrl!.trim(),
       fileType: body.fileType?.trim() || "PDF",
       fileSize: body.fileSize ?? null,
       status: body.status ?? "DRAFT",

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_AVATAR, getPublicContentWhere } from "@/lib/queries/constants";
+import { resolveMediaUrlWithFallback } from "@/lib/media-url";
 import type { Author } from "@/types/home";
 
 export async function getPublishedAuthors(limit = 48): Promise<Author[]> {
@@ -38,7 +39,7 @@ export async function getPublishedAuthors(limit = 48): Promise<Author[]> {
     name: author.name,
     title: author.title ?? "Yazar",
     articleCount: author._count.contents,
-    avatar: author.avatar ?? DEFAULT_AVATAR,
+    avatar: resolveMediaUrlWithFallback(author.avatar, DEFAULT_AVATAR),
     slug: author.id,
   }));
 }

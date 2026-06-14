@@ -9,6 +9,7 @@ import {
   contentInclude,
   extractSeoPayload,
   generateUniqueSlug,
+  prepareContentInputForStorage,
   serializeContent,
   syncContentTags,
   validateContentInput,
@@ -87,6 +88,8 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (validationError) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
+
+  body = prepareContentInputForStorage(body);
 
   const updateData: {
     title?: string;

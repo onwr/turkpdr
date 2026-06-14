@@ -8,6 +8,10 @@ import {
   getPublicFileWhere,
 } from "@/lib/queries/constants";
 import { formatDateTR, formatMonthYearTR } from "@/lib/queries/format";
+import {
+  resolveMediaUrl,
+  resolveMediaUrlWithFallback,
+} from "@/lib/media-url";
 import type {
   PopularContent,
   ProfileFavorite,
@@ -98,8 +102,8 @@ export async function getProfileById(
     id: user.id,
     name: user.name,
     title: user.title ?? "Üye",
-    avatar: user.avatar ?? DEFAULT_AVATAR,
-    coverImage: user.coverImage ?? "",
+    avatar: resolveMediaUrlWithFallback(user.avatar, DEFAULT_AVATAR),
+    coverImage: resolveMediaUrl(user.coverImage) ?? "",
     about: user.bio ?? "Henüz biyografi eklenmemiş.",
     workAreas,
     expertiseAreas,
@@ -138,7 +142,7 @@ export async function getProfilePosts(userId: string): Promise<ProfilePost[]> {
     slug: c.slug,
     date: formatDateTR(c.publishedAt ?? c.createdAt),
     likeCount: c._count.likes,
-    coverImage: c.coverImage ?? DEFAULT_COVER_IMAGE,
+    coverImage: resolveMediaUrlWithFallback(c.coverImage, DEFAULT_COVER_IMAGE),
   }));
 }
 

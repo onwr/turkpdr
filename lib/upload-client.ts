@@ -1,4 +1,5 @@
 import type { UploadResponse } from "@/types/upload";
+import { normalizeMediaUrl } from "@/lib/media-url";
 
 export async function uploadFile(
   file: File,
@@ -26,7 +27,10 @@ export async function uploadFile(
       };
     }
 
-    return data;
+    return {
+      ...data,
+      url: normalizeMediaUrl(data.url) ?? data.url,
+    };
   } catch {
     return {
       success: false,

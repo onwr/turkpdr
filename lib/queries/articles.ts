@@ -13,6 +13,10 @@ import {
   formatDateTR,
 } from "@/lib/queries/format";
 import { sanitizeHtml } from "@/lib/sanitize-html";
+import {
+  resolveMediaUrlWithFallback,
+  resolveRichTextMediaUrls,
+} from "@/lib/media-url";
 import { resolveContentSeo } from "@/lib/seo/metadata";
 import type {
   ArticleCategory,
@@ -85,7 +89,10 @@ function mapToArticleDetail(content: {
     author: {
       name: content.author.name,
       title: content.author.title ?? "Yazar",
-      avatar: content.author.avatar ?? DEFAULT_AVATAR,
+      avatar: resolveMediaUrlWithFallback(
+        content.author.avatar,
+        DEFAULT_AVATAR
+      ),
       bio: content.author.bio ?? "",
       slug: content.author.id,
       articleCount: 0,
@@ -93,8 +100,11 @@ function mapToArticleDetail(content: {
     date: formatDateTR(publishedAt),
     publishedAt: publishedAt.toISOString(),
     readTime: estimateReadTime(htmlContent),
-    coverImage: content.coverImage ?? DEFAULT_COVER_IMAGE,
-    content: sanitizeHtml(htmlContent),
+    coverImage: resolveMediaUrlWithFallback(
+      content.coverImage,
+      DEFAULT_COVER_IMAGE
+    ),
+    content: resolveRichTextMediaUrls(sanitizeHtml(htmlContent)),
     likeCount: content._count.likes,
     seoTitle: seo.title,
     seoDescription: seo.description,
@@ -167,7 +177,7 @@ export async function getRelatedArticles(
     title: c.title,
     excerpt: c.summary ?? "",
     category: c.category?.name ?? "Genel",
-    coverImage: c.coverImage ?? DEFAULT_COVER_IMAGE,
+    coverImage: resolveMediaUrlWithFallback(c.coverImage, DEFAULT_COVER_IMAGE),
     readTime: estimateReadTime(c.content),
   }));
 }
@@ -186,7 +196,7 @@ export async function getArticleComments(
   return comments.map((c) => ({
     id: c.id,
     author: c.user.name,
-    avatar: c.user.avatar ?? DEFAULT_AVATAR,
+    avatar: resolveMediaUrlWithFallback(c.user.avatar, DEFAULT_AVATAR),
     date: formatDateTR(c.createdAt),
     content: c.content,
   }));
@@ -326,7 +336,7 @@ function mapContentToArticle(c: {
     category: c.category?.name ?? "Genel",
     author: c.author.name,
     date: formatDateTR(c.publishedAt ?? c.createdAt),
-    coverImage: c.coverImage ?? DEFAULT_COVER_IMAGE,
+    coverImage: resolveMediaUrlWithFallback(c.coverImage, DEFAULT_COVER_IMAGE),
   };
 }
 
@@ -348,7 +358,7 @@ export async function getPublishedNews(limit = 24): Promise<NewsItem[]> {
     excerpt: c.summary ?? "",
     category: c.category?.name ?? "Haber",
     date: formatDateTR(c.publishedAt ?? c.createdAt),
-    coverImage: c.coverImage ?? DEFAULT_COVER_IMAGE,
+    coverImage: resolveMediaUrlWithFallback(c.coverImage, DEFAULT_COVER_IMAGE),
     featured: c.featured,
   }));
 }
@@ -399,7 +409,7 @@ export async function getPublishedNewsByCategory(
     excerpt: c.summary ?? "",
     category: c.category?.name ?? "Haber",
     date: formatDateTR(c.publishedAt ?? c.createdAt),
-    coverImage: c.coverImage ?? DEFAULT_COVER_IMAGE,
+    coverImage: resolveMediaUrlWithFallback(c.coverImage, DEFAULT_COVER_IMAGE),
     featured: c.featured,
   }));
 }
@@ -482,7 +492,7 @@ export async function getRelatedNews(
     title: c.title,
     excerpt: c.summary ?? "",
     category: c.category?.name ?? "Haber",
-    coverImage: c.coverImage ?? DEFAULT_COVER_IMAGE,
+    coverImage: resolveMediaUrlWithFallback(c.coverImage, DEFAULT_COVER_IMAGE),
     readTime: estimateReadTime(c.content),
   }));
 }

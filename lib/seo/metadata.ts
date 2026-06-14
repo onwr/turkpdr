@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { resolveMediaUrl } from "@/lib/media-url";
 import type { ResolvedSeo, SeoSource } from "@/types/seo";
 
 export function getSiteBaseUrl(): string {
@@ -32,12 +33,13 @@ export function resolveSeo(
       source.shortDescription?.trim() ||
       defaults.descriptionFallback ||
       source.title.trim(),
-    ogImage:
+    ogImage: resolveMediaUrl(
       source.ogImage?.trim() ||
-      source.coverImage?.trim() ||
-      source.image?.trim() ||
-      defaults.defaultImage?.trim() ||
-      null,
+        source.coverImage?.trim() ||
+        source.image?.trim() ||
+        defaults.defaultImage?.trim() ||
+        null
+    ),
     canonicalUrl: source.canonicalUrl?.trim() || `${baseUrl}${defaults.path}`,
     noIndex: source.noIndex ?? false,
   };
@@ -81,7 +83,7 @@ export function buildPageMetadata(
         ? {
             images: [
               {
-                url: seo.ogImage,
+                url: resolveMediaUrl(seo.ogImage) ?? seo.ogImage,
                 width: 1200,
                 height: 630,
                 alt: seo.title,
@@ -94,7 +96,7 @@ export function buildPageMetadata(
       card: seo.ogImage ? "summary_large_image" : "summary",
       title: seo.title,
       description: seo.description,
-      ...(seo.ogImage ? { images: [seo.ogImage] } : {}),
+      ...(seo.ogImage ? { images: [resolveMediaUrl(seo.ogImage) ?? seo.ogImage] } : {}),
     },
   };
 

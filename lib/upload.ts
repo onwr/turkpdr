@@ -2,6 +2,7 @@ import { mkdir, writeFile, access } from "fs/promises";
 import path from "path";
 import slugify from "slugify";
 
+import { normalizeMediaUrl } from "@/lib/media-url";
 import {
   MIME_TO_EXTENSION,
   UPLOAD_MIME_TYPES,
@@ -154,7 +155,7 @@ export async function saveUploadedFile(
 
   return {
     success: true,
-    url,
+    url: normalizeMediaUrl(url) ?? url,
     fileName,
     fileType: mimeType,
     size: file.size,

@@ -4,6 +4,7 @@ import {
   generateUniqueSlug,
   isRichContentEmpty,
   syncContentTags,
+  prepareContentInputForStorage,
   validateContentInput,
 } from "@/lib/admin/content-utils";
 import { requireAuth } from "@/lib/api/auth";
@@ -129,6 +130,8 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
+  body = prepareContentInputForStorage(body);
+
   const tagsError = validateTags(body.tags);
   if (tagsError) {
     return NextResponse.json({ error: tagsError }, { status: 400 });
@@ -175,7 +178,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     updateData.content = body.content?.trim() || null;
   }
   if (body.coverImage !== undefined) {
-    updateData.coverImage = body.coverImage?.trim() || null;
+    updateData.coverImage = body.coverImage;
   }
   if (body.categoryId !== undefined) {
     updateData.categoryId = body.categoryId || null;

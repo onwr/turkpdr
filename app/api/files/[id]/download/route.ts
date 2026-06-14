@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { normalizeMediaUrl } from "@/lib/media-url";
 import { prisma } from "@/lib/prisma";
 import { getPublicFileWhere } from "@/lib/queries/constants";
 
@@ -25,9 +26,10 @@ export async function GET(request: Request, context: RouteContext) {
     data: { downloads: { increment: 1 } },
   });
 
-  const targetUrl = file.fileUrl.startsWith("http")
-    ? file.fileUrl
-    : new URL(file.fileUrl, request.url).toString();
+  const normalizedPath = normalizeMediaUrl(file.fileUrl);
+  if (!normalizedPath) {
+    return NextResponse.json({ error: "Dosya URL'si geçersiz." }, { status: 404 });
+  }
 
-  return NextResponse.redirect(targetUrl);
+  return NextResponse.redirect(new URL(normalizedPath, request.url));
 }

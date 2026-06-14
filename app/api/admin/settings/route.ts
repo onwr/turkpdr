@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/admin/api-auth";
+import { normalizeMediaUrl } from "@/lib/media-url";
 import {
   getOrCreateSiteSettings,
   serializeSiteSettings,
@@ -93,9 +94,11 @@ export async function PATCH(request: Request) {
   } = {};
 
   if (body.siteName !== undefined) updateData.siteName = body.siteName.trim();
-  if (body.logoUrl !== undefined) updateData.logoUrl = normalizeOptional(body.logoUrl);
+  if (body.logoUrl !== undefined) {
+    updateData.logoUrl = normalizeMediaUrl(normalizeOptional(body.logoUrl));
+  }
   if (body.faviconUrl !== undefined) {
-    updateData.faviconUrl = normalizeOptional(body.faviconUrl);
+    updateData.faviconUrl = normalizeMediaUrl(normalizeOptional(body.faviconUrl));
   }
   if (body.metaTitle !== undefined) {
     updateData.metaTitle = normalizeOptional(body.metaTitle);

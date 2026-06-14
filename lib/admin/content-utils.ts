@@ -3,6 +3,7 @@ import slugify from "slugify";
 
 import { prisma } from "@/lib/prisma";
 import { toAppContentStatus } from "@/types/content";
+import { normalizeContentMediaInput } from "@/lib/media-url";
 import { seoFieldsToPayload } from "@/types/seo";
 
 export function createSlug(text: string): string {
@@ -79,6 +80,10 @@ export function extractSeoPayload(body: ContentInput) {
     canonicalUrl: body.canonicalUrl ?? "",
     noIndex: body.noIndex ?? false,
   });
+}
+
+export function prepareContentInputForStorage(body: ContentInput): ContentInput {
+  return normalizeContentMediaInput(body);
 }
 
 export function validateContentInput(

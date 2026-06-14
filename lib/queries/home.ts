@@ -10,6 +10,7 @@ import {
   getPublicTestWhere,
 } from "@/lib/queries/constants";
 import { formatDateTR } from "@/lib/queries/format";
+import { resolveMediaUrlWithFallback } from "@/lib/media-url";
 import type {
   Article,
   Author,
@@ -53,7 +54,10 @@ function mapToHomeArticle(content: {
     category: content.category?.name ?? "Genel",
     author: content.author.name,
     date: formatDateTR(content.publishedAt ?? content.createdAt),
-    coverImage: content.coverImage ?? DEFAULT_COVER_IMAGE,
+    coverImage: resolveMediaUrlWithFallback(
+      content.coverImage,
+      DEFAULT_COVER_IMAGE
+    ),
   };
 }
 
@@ -75,7 +79,10 @@ function mapToNewsItem(content: {
     excerpt: content.summary ?? "",
     category: content.category?.name ?? "Haber",
     date: formatDateTR(content.publishedAt ?? content.createdAt),
-    coverImage: content.coverImage ?? DEFAULT_COVER_IMAGE,
+    coverImage: resolveMediaUrlWithFallback(
+      content.coverImage,
+      DEFAULT_COVER_IMAGE
+    ),
     featured: content.featured,
   };
 }
@@ -144,7 +151,7 @@ export async function getAuthors(limit = 4): Promise<Author[]> {
     name: author.name,
     title: author.title ?? "Yazar",
     articleCount: author._count.contents,
-    avatar: author.avatar ?? DEFAULT_AVATAR,
+    avatar: resolveMediaUrlWithFallback(author.avatar, DEFAULT_AVATAR),
     slug: author.id,
   }));
 }
