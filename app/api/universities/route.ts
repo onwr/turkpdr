@@ -1,0 +1,241 @@
+import { NextResponse } from 'next/server';
+import fs from 'fs/promises';
+import path from 'path';
+import { UniversityProgram, PaginatedResponse } from '@/types/university';
+
+let cachedData: UniversityProgram[] | null = null;
+
+async function getUniversitiesData(): Promise<UniversityProgram[]> {
+  if (cachedData) return cachedData;
+  try {
+    const filePath = path.join(process.cwd(), 'universiteler.json');
+    const fileContents = await fs.readFile(filePath, 'utf8');
+    cachedData = JSON.parse(fileContents);
+    return cachedData!;
+  } catch (error) {
+    console.error('Error reading universiteler.json:', error);
+    return [];
+  }
+}
+
+// --- Yardımcı: Türkçe sayı formatını float'a çevir (551.132 -> 551.132 float) ---
+// Not: Veride taban puanı 551.132 gibi noktalı float, başarı sırası ise 1000000 gibi tam sayı
+function parseScore(val: string): number {
+  if (!val || val === '-') return 0;
+  // Taban puanı formatı: 551.132 (nokta ondalık ayracı)
+  // Başarı sırası: 38, 1000000 vb (tam sayı)
+  const num = parseFloat(val.replace(',', '.'));
+  return isNaN(num) ? 0 : num;
+}
+
+function parseRank(val: string): number {
+  if (!val || val === '-') return 999999999;
+  // Sıralama sayıları bazen 1.000.000 (binlik nokta) formatında olabilir
+  // Önce noktalı float mi kontrol et, değilse binlik ayracı temizle
+  const stripped = val.replace(/\./g, '').replace(',', '.');
+  const num = parseFloat(stripped);
+  return isNaN(num) ? 999999999 : num;
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+
+  const query = searchParams.get('q')?.toLocaleLowerCase('tr-TR').trim() || '';
+  const puan_tipi = searchParams.get('puan_tipi') || '';
+  const sehir = searchParams.get('sehir') || '';
+  const universite = searchParams.get('universite') || '';
+  const program_turu = searchParams.get('program_turu') || '';
+  const universite_turu = searchParams.get('universite_turu') || '';
+  const uyruk = searchParams.get('uyruk') || '';
+  const sira_min = searchParams.get('sira_min') ? parseFloat(searchParams.get('sira_min')!) : null;
+  const sira_max = searchParams.get('sira_max') ? parseFloat(searchParams.get('sira_max')!) : null;
+  const puan_min = searchParams.get('puan_min') ? parseFloat(searchParams.get('puan_min')!) : null;
+  const puan_max = searchParams.get('puan_max') ? parseFloat(searchParams.get('puan_max')!) : null;
+  const yeni_acilan = searchParams.get('yeni_acilan') === '1';
+  const dolmamis = searchParams.get('dolmamis') === '1';
+  const okul_birincisi = searchParams.get('okul_birincisi') === '1';
+  const depremzede = searchParams.get('depremzede') === '1';
+  const sehit_gazi = searchParams.get('sehit_gazi') === '1';
+  const kadin_34 = searchParams.get('kadin_34') === '1';
+
+  const burs = searchParams.get('burs') || '';
+  const dil = searchParams.get('dil') || '';
+  const kibris = searchParams.get('kibris') === '1';
+  const mtok = searchParams.get('mtok') === '1';
+  const akreditasyon = searchParams.get('akreditasyon') === '1';
+
+  const siralama = searchParams.get('siralama') || 'basari_sirasi';
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const limit = parseInt(searchParams.get('limit') || '50', 10);
+
+  let data = await getUniversitiesData();
+  if (!data || data.length === 0) {
+    return NextResponse.json({ error: 'Data not found' }, { status: 500 });
+  }
+
+  // --- Filtering ---
+  data = data.filter((item) => {
+    if (puan_tipi) {
+      const arr = puan_tipi.split(',');
+      if (!arr.includes(item.puan_tipi)) return false;
+    }
+    if (sehir && item.sehir !== sehir) return false;
+    if (universite && item.universite !== universite) return false;
+
+    // Program türü filtresi
+    if (program_turu) {
+      const arr = program_turu.split(',');
+      if (!arr.some(t => {
+        const itemTuru = item.program_turu || '';
+        if (t === 'ÖNLİSANS' || t === 'NLISANS') return itemTuru.includes('NLISANS') || itemTuru.includes('ÖNLİSANS') || itemTuru.includes('ÖNLISANS');
+        if (t === 'LISANS' || t === 'LİSANS') return itemTuru === 'LISANS' || itemTuru === 'LİSANS';
+        return itemTuru === t;
+      })) {
+        return false;
+      }
+    }
+
+    // Üniversite türü filtresi
+    if (universite_turu) {
+      const arr = universite_turu.split(',');
+      if (!arr.includes(item.universite_turu)) return false;
+    }
+
+    // Uyruk filtresi: ozel_kosullar alanında T.C.=kod 22, KKTC=bazı kodlar
+    if (uyruk === 'tc') {
+      const kosullar = item.ozel_kosullar || '';
+      const codes = kosullar.split(',').map(s => s.trim());
+      // T.C. uyruklu = sadece 22 kodu içermeyenler (TC'ye açık)
+      // Basit yaklaşım: KKTC özel kodu içerenleri hariç tut
+      if (codes.includes('4') || codes.includes('5') || codes.includes('6')) return false;
+    }
+    if (uyruk === 'kktc') {
+      const kosullar = item.ozel_kosullar || '';
+      const codes = kosullar.split(',').map(s => s.trim());
+      if (!codes.includes('4') && !codes.includes('5') && !codes.includes('6')) return false;
+    }
+
+    // Özel koşul filtreleri (ÖSYM kodları)
+    if (okul_birincisi) {
+      const codes = (item.ozel_kosullar || '').split(',').map(s => s.trim());
+      if (!codes.includes('1')) return false;
+    }
+    if (depremzede) {
+      const codes = (item.ozel_kosullar || '').split(',').map(s => s.trim());
+      if (!codes.some(c => c === '320' || c === '321' || c === '322')) return false;
+    }
+    if (sehit_gazi) {
+      const codes = (item.ozel_kosullar || '').split(',').map(s => s.trim());
+      if (!codes.some(c => ['34', '144', '155', '162', '167'].includes(c))) return false;
+    }
+    if (kadin_34) {
+      const codes = (item.ozel_kosullar || '').split(',').map(s => s.trim());
+      if (!codes.includes('266')) return false;
+    }
+
+    // Yeni açılan bölüm: 2024 VE 2023 verisi yoksa yeni açılan
+    if (yeni_acilan) {
+      const no2024 = !item.basari_sirasi_2024 || item.basari_sirasi_2024 === '-' || item.basari_sirasi_2024 === '';
+      const no2023 = !item.basari_sirasi_2023 || item.basari_sirasi_2023 === '-' || item.basari_sirasi_2023 === '';
+      if (!no2024 || !no2023) return false;
+    }
+
+    // Kontenjanı dolmamış: yerleşen kontenjan < genel kontenjan
+    if (dolmamis) {
+      const genel = parseInt(item.kontenjan_2025_genel) || 0;
+      const yerlesen = parseInt(item.kontenjan_2025_yrlsn) || 0;
+      if (genel > 0 && yerlesen >= genel) return false;
+    }
+
+    // Yeni Özel Filtreler
+    if (kibris) {
+      if (item.sehir !== 'KIBRIS') return false;
+    }
+
+    if (mtok) {
+      const e = (item.ek_bilgi || '').toLowerCase();
+      if (!e.includes('m.t.o.k.')) return false;
+    }
+
+    if (akreditasyon) {
+      const a = item.akreditasyon || '';
+      if (!a || a === '*' || a === '-') return false;
+    }
+
+    if (burs) {
+      const e = (item.ek_bilgi || '').toLowerCase();
+      if (burs === 'tam_burslu') {
+        // İçinde "burslu" geçsin ama "%50" veya "%25" geçmesin
+        if (!e.includes('burslu') || e.includes('%50') || e.includes('%25')) return false;
+      } else if (burs === 'indirimli_50') {
+        if (!e.includes('%50')) return false;
+      } else if (burs === 'indirimli_25') {
+        if (!e.includes('%25')) return false;
+      } else if (burs === 'ucretli') {
+        if (!e.includes('ücretli')) return false;
+      }
+    }
+
+    if (dil) {
+      const targetStr = dil.toLocaleLowerCase('tr-TR');
+      const egitimDili = (item.egitim_dili || '').toLocaleLowerCase('tr-TR');
+      if (!egitimDili.includes(targetStr)) return false;
+    }
+
+    // Sıralama aralığı filtresi
+    if (sira_min !== null || sira_max !== null) {
+      const sira = parseRank(item.basari_sirasi_2025);
+      if (sira === 999999999) return false; // Sıralaması olmayan programları filtreden çıkar
+      if (sira_min !== null && sira < sira_min) return false;
+      if (sira_max !== null && sira > sira_max) return false;
+    }
+
+    // Puan aralığı filtresi
+    if (puan_min !== null || puan_max !== null) {
+      const puan = parseScore(item.taban_puani_2025);
+      if (puan === 0) return false; // Puanı olmayan programları çıkar
+      if (puan_min !== null && puan < puan_min) return false;
+      if (puan_max !== null && puan > puan_max) return false;
+    }
+
+    // Text arama
+    if (query) {
+      const searchString = `${item.universite} ${item.bolum_program} ${item.fakulte} ${item.sehir} ${item.program_kodu} ${item.ek_bilgi}`.toLocaleLowerCase('tr-TR');
+      if (!searchString.includes(query)) return false;
+    }
+
+    return true;
+  });
+
+  // --- Sorting ---
+  data = [...data].sort((a, b) => {
+    if (siralama === 'taban_puani') {
+      const pA = parseScore(a.taban_puani_2025);
+      const pB = parseScore(b.taban_puani_2025);
+      return pB - pA; // Yüksek puan önce
+    } else if (siralama === 'program_kodu') {
+      return a.program_kodu.localeCompare(b.program_kodu);
+    } else {
+      // Başarı sırasına göre (küçük sıra = daha iyi = önce gelir)
+      const sA = parseRank(a.basari_sirasi_2025);
+      const sB = parseRank(b.basari_sirasi_2025);
+      return sA - sB;
+    }
+  });
+
+  // --- Pagination ---
+  const total = data.length;
+  const totalPages = Math.ceil(total / limit);
+  const offset = (page - 1) * limit;
+  const paginatedData = data.slice(offset, offset + limit);
+
+  const response: PaginatedResponse<UniversityProgram> = {
+    data: paginatedData,
+    total,
+    page,
+    limit,
+    totalPages,
+  };
+
+  return NextResponse.json(response);
+}
