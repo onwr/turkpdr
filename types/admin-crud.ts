@@ -62,7 +62,7 @@ export const defaultTestFormState: TestFormState = {
   duration: "",
   questionCount: "",
   iframeUrl: "",
-  status: "DRAFT",
+  status: "PUBLISHED",
   scheduledAt: "",
   categoryId: "",
   seo: { ...defaultSeoFields },

@@ -36,7 +36,7 @@ export default function UniversityTable({
   return (
     <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm print:shadow-none print:border-none">
       {/* Table */}
-      <div className="overflow-x-auto relative print-area" style={{ minHeight: isLoading ? 400 : 'auto' }}>
+      <div className="overflow-x-auto relative" style={{ minHeight: isLoading ? 400 : 'auto' }}>
         {isLoading && (
           <div className="absolute inset-0 bg-white/70 z-10 flex items-center justify-center">
             <div className="flex flex-col items-center gap-3">

@@ -87,7 +87,7 @@ export function Footer({ branding }: FooterProps) {
   ].filter((link) => link.href);
 
   return (
-    <footer className="border-t border-border/60 bg-brand-navy text-white dark:bg-card dark:text-foreground">
+    <footer className="border-t border-border/60 bg-brand-navy text-white print:hidden dark:bg-card dark:text-foreground">
       <div className={`${siteContainerClass} py-12 lg:py-16`}>
         <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-4">

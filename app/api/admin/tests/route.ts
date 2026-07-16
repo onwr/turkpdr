@@ -123,7 +123,7 @@ export async function POST(request: Request) {
 
   const slug = await generateUniqueModelSlug(body.title!.trim(), "test");
   const seoPayload = extractTestSeoPayload(body);
-  const status = body.status ?? "DRAFT";
+  const status = body.status ?? "PUBLISHED";
   const scheduledAt = parseScheduledAtInput(body.scheduledAt);
   const publishFields = resolveTestPublishFields({
     status,

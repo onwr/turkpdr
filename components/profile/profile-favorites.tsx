@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { Bookmark, ClipboardList, FileText, Newspaper, PenLine } from "lucide-react";
 
+import { getPublishedContentHref } from "@/lib/account/content-url";
 import type { ProfileFavorite } from "@/types/profile";
 import { cn } from "@/lib/utils";
 
 const typeConfig = {
-  makale: { icon: PenLine, href: "makaleler", color: "bg-indigo-50 text-indigo-600" },
-  haber: { icon: Newspaper, href: "haberler", color: "bg-sky-50 text-sky-600" },
-  dosya: { icon: FileText, href: "dosyalar", color: "bg-amber-50 text-amber-600" },
-  test: { icon: ClipboardList, href: "test-merkezi", color: "bg-emerald-50 text-emerald-600" },
+  makale: { icon: PenLine, fallbackHref: "makaleler", color: "bg-indigo-50 text-indigo-600" },
+  haber: { icon: Newspaper, fallbackHref: "haberler", color: "bg-sky-50 text-sky-600" },
+  dosya: { icon: FileText, fallbackHref: "dosyalar", color: "bg-amber-50 text-amber-600" },
+  test: { icon: ClipboardList, fallbackHref: "test-merkezi", color: "bg-emerald-50 text-emerald-600" },
 } as const;
 
 type ProfileFavoritesProps = {
@@ -29,11 +30,14 @@ export function ProfileFavorites({ favorites }: ProfileFavoritesProps) {
       {favorites.map((item) => {
         const config = typeConfig[item.type];
         const Icon = config.icon;
+        const href =
+          getPublishedContentHref(item.contentType, item.slug) ??
+          `/${config.fallbackHref}/${item.slug}`;
 
         return (
           <li key={item.id}>
             <Link
-              href={`/${config.href}/${item.slug}`}
+              href={href}
               className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50 transition-all hover:border-brand-blue/20 hover:shadow-md"
             >
               <div

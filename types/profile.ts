@@ -1,3 +1,5 @@
+import type { ContentType } from "@prisma/client";
+
 export type ProfileTab = "posts" | "files" | "favorites";
 
 export type UserProfile = {
@@ -28,6 +30,7 @@ export type ProfilePost = {
   excerpt: string;
   category: string;
   type: "makale" | "haber";
+  contentType: ContentType;
   slug: string;
   date: string;
   likeCount: number;
@@ -48,6 +51,7 @@ export type ProfileFavorite = {
   id: string;
   title: string;
   type: "makale" | "haber" | "dosya" | "test";
+  contentType: ContentType;
   slug: string;
   savedAt: string;
 };
@@ -56,6 +60,7 @@ export type PopularContent = {
   id: string;
   title: string;
   type: string;
+  contentType: ContentType;
   slug: string;
   viewCount: number;
 };

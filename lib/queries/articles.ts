@@ -123,6 +123,14 @@ export async function getPublishedContentSlugs(): Promise<string[]> {
   return contents.map((c) => c.slug);
 }
 
+/** Shared view counter for the Content model (news, articles, videos, psiko-sanat). */
+export async function incrementContentViews(id: string) {
+  return prisma.content.update({
+    where: { id },
+    data: { views: { increment: 1 } },
+  });
+}
+
 export async function getArticleBySlug(
   slug: string
 ): Promise<ArticleDetail | null> {

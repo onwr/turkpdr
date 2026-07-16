@@ -56,9 +56,17 @@ describe("normalizeRichTextMediaUrls", () => {
 });
 
 describe("resolveMediaUrl", () => {
-  it("prefixes site URL for upload paths", () => {
-    const resolved = resolveMediaUrl("/uploads/files/test.pdf");
-    assert.ok(resolved?.endsWith("/uploads/files/test.pdf"));
-    assert.ok(resolved?.startsWith("http"));
+  it("keeps upload paths relative so they resolve against the current origin", () => {
+    assert.equal(
+      resolveMediaUrl("/uploads/files/test.pdf"),
+      "/uploads/files/test.pdf"
+    );
+  });
+
+  it("passes external URLs through unchanged", () => {
+    assert.equal(
+      resolveMediaUrl("https://images.unsplash.com/photo.jpg"),
+      "https://images.unsplash.com/photo.jpg"
+    );
   });
 });

@@ -11,6 +11,7 @@ import {
 } from "@/lib/queries/constants";
 import { formatDateTR } from "@/lib/queries/format";
 import { resolveMediaUrlWithFallback } from "@/lib/media-url";
+import { SPECIAL_TESTS } from "@/lib/special-tests";
 import type {
   Article,
   Author,
@@ -164,7 +165,7 @@ export async function getHomeTests(limit = 8): Promise<PsychologicalTest[]> {
     take: limit,
   });
 
-  return tests.map((test) => ({
+  const dbTests: PsychologicalTest[] = tests.map((test) => ({
     id: test.id,
     title: test.title,
     category:
@@ -173,6 +174,22 @@ export async function getHomeTests(limit = 8): Promise<PsychologicalTest[]> {
     questionCount: test.questionCount ?? 0,
     slug: test.slug,
   }));
+
+  // Hardcoded special tests (e.g. SCL-90) live outside the DB and are never
+  // returned by the query above; merge them in like every other test listing does.
+  const existingSlugs = new Set(dbTests.map((test) => test.slug));
+  const specials: PsychologicalTest[] = SPECIAL_TESTS.filter(
+    (test) => !existingSlugs.has(test.slug)
+  ).map((test) => ({
+    id: test.id,
+    title: test.title,
+    category: test.category,
+    duration: test.duration,
+    questionCount: test.questionCount,
+    slug: test.slug,
+  }));
+
+  return [...specials, ...dbTests].slice(0, limit);
 }
 
 export async function getHomeFiles(limit = 6): Promise<FileItem[]> {
@@ -192,14 +209,20 @@ export async function getHomeFiles(limit = 6): Promise<FileItem[]> {
 }
 
 export async function getHomeStats(): Promise<StatItem[]> {
-  const [articleCount, testCount, memberCount, fileCount] = await Promise.all([
+  const [articleCount, dbTestSlugs, memberCount, fileCount] = await Promise.all([
     prisma.content.count({
       where: { ...getPublicContentWhere(), type: { in: ARTICLE_TYPES } },
     }),
-    prisma.test.count({ where: getPublicTestWhere() }),
+    prisma.test.findMany({ where: getPublicTestWhere(), select: { slug: true } }),
     prisma.user.count({ where: { status: "ACTIVE" } }),
     prisma.fileAsset.count({ where: getPublicFileWhere() }),
   ]);
+
+  // Special tests (e.g. SCL-90) live outside the DB, so a plain count()
+  // misses them — count distinct slugs the same way the listing merges do.
+  const dbSlugs = new Set(dbTestSlugs.map((t) => t.slug));
+  const specialCount = SPECIAL_TESTS.filter((t) => !dbSlugs.has(t.slug)).length;
+  const testCount = dbTestSlugs.length + specialCount;
 
   return [
     { id: "articles", label: "Makale", value: articleCount, icon: "articles" },

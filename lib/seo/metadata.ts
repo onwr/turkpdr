@@ -9,6 +9,13 @@ export function getSiteBaseUrl(): string {
   );
 }
 
+/** Absolutizes a relative media URL for contexts that require it (OG/social meta tags). */
+export function toAbsoluteMediaUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${getSiteBaseUrl()}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
 type ResolveSeoDefaults = {
   titleSuffix: string;
   path: string;
@@ -33,12 +40,14 @@ export function resolveSeo(
       source.shortDescription?.trim() ||
       defaults.descriptionFallback ||
       source.title.trim(),
-    ogImage: resolveMediaUrl(
-      source.ogImage?.trim() ||
-        source.coverImage?.trim() ||
-        source.image?.trim() ||
-        defaults.defaultImage?.trim() ||
-        null
+    ogImage: toAbsoluteMediaUrl(
+      resolveMediaUrl(
+        source.ogImage?.trim() ||
+          source.coverImage?.trim() ||
+          source.image?.trim() ||
+          defaults.defaultImage?.trim() ||
+          null
+      )
     ),
     canonicalUrl: source.canonicalUrl?.trim() || `${baseUrl}${defaults.path}`,
     noIndex: source.noIndex ?? false,
@@ -83,7 +92,7 @@ export function buildPageMetadata(
         ? {
             images: [
               {
-                url: resolveMediaUrl(seo.ogImage) ?? seo.ogImage,
+                url: seo.ogImage,
                 width: 1200,
                 height: 630,
                 alt: seo.title,
@@ -96,7 +105,7 @@ export function buildPageMetadata(
       card: seo.ogImage ? "summary_large_image" : "summary",
       title: seo.title,
       description: seo.description,
-      ...(seo.ogImage ? { images: [resolveMediaUrl(seo.ogImage) ?? seo.ogImage] } : {}),
+      ...(seo.ogImage ? { images: [seo.ogImage] } : {}),
     },
   };
 

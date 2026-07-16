@@ -38,96 +38,96 @@ enum ContentStatus {
 }
 
 model User {
-  id        String     @id @default(cuid())
-  name      String
-  email     String     @unique
-  password  String?
-  avatar    String?
-  coverImage String?
-  title     String?
-  bio       String?
-  phone     String?
-  city      String?
-  website   String?
-  workAreas String[] @default([])
-  expertiseAreas String[] @default([])
-  role      UserRole   @default(MEMBER)
-  status    UserStatus @default(ACTIVE)
+  id             String     @id @default(cuid())
+  name           String
+  email          String     @unique
+  password       String?
+  avatar         String?
+  coverImage     String?
+  title          String?
+  bio            String?
+  phone          String?
+  city           String?
+  website        String?
+  workAreas      String[]   @default([])
+  expertiseAreas String[]   @default([])
+  role           UserRole   @default(MEMBER)
+  status         UserStatus @default(ACTIVE)
 
-  contents  Content[]
-  comments  Comment[]
-  likes     Like[]
-  favorites Favorite[]
-  files     FileAsset[]
-  mediaAssets MediaAsset[]
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-  conversationStates      MessageConversationState[] @relation("ConversationStateUser")
+  contents                  Content[]
+  comments                  Comment[]
+  likes                     Like[]
+  favorites                 Favorite[]
+  files                     FileAsset[]
+  mediaAssets               MediaAsset[]
+  sentMessages              Message[]                  @relation("SentMessages")
+  receivedMessages          Message[]                  @relation("ReceivedMessages")
+  conversationStates        MessageConversationState[] @relation("ConversationStateUser")
   partnerConversationStates MessageConversationState[] @relation("ConversationStatePartner")
-  testResults      TestResult[]
-  activityLogs     ActivityLog[]
-  notifications    Notification[]
-  reviewedContents Content[] @relation("ReviewedContents")
-  assignedContents Content[] @relation("AssignedContents")
+  testResults               TestResult[]
+  activityLogs              ActivityLog[]
+  notifications             Notification[]
+  reviewedContents          Content[]                  @relation("ReviewedContents")
+  assignedContents          Content[]                  @relation("AssignedContents")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Category {
-  id        String      @id @default(cuid())
-  name      String
-  slug      String      @unique
-  type      ContentType
+  id   String      @id @default(cuid())
+  name String
+  slug String      @unique
+  type ContentType
 
-  contents  Content[]
-  tests     Test[]
+  contents Content[]
+  tests    Test[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Content {
-  id          String        @id @default(cuid())
-  title       String
-  slug        String        @unique
-  summary     String?
-  content     String?
-  coverImage  String?
-  type        ContentType
-  status      ContentStatus @default(DRAFT)
-  featured    Boolean       @default(false)
-  views       Int           @default(0)
+  id         String        @id @default(cuid())
+  title      String
+  slug       String        @unique
+  summary    String?
+  content    String?
+  coverImage String?
+  type       ContentType
+  status     ContentStatus @default(DRAFT)
+  featured   Boolean       @default(false)
+  views      Int           @default(0)
 
   seoTitle       String?
   seoDescription String?
   ogImage        String?
   canonicalUrl   String?
-  noIndex        Boolean       @default(false)
+  noIndex        Boolean @default(false)
 
-  authorId   String
-  author     User          @relation(fields: [authorId], references: [id])
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
 
   categoryId String?
-  category   Category?     @relation(fields: [categoryId], references: [id])
+  category   Category? @relation(fields: [categoryId], references: [id])
 
-  tags       ContentTag[]
-  comments   Comment[]
-  likes      Like[]
-  favorites  Favorite[]
+  tags      ContentTag[]
+  comments  Comment[]
+  likes     Like[]
+  favorites Favorite[]
 
-  reviewNote         String?
-  reviewedById       String?
-  reviewedBy         User?     @relation("ReviewedContents", fields: [reviewedById], references: [id])
-  reviewedAt         DateTime?
-  assignedEditorId   String?
-  assignedEditor     User?     @relation("AssignedContents", fields: [assignedEditorId], references: [id])
+  reviewNote       String?
+  reviewedById     String?
+  reviewedBy       User?     @relation("ReviewedContents", fields: [reviewedById], references: [id])
+  reviewedAt       DateTime?
+  assignedEditorId String?
+  assignedEditor   User?     @relation("AssignedContents", fields: [assignedEditorId], references: [id])
 
   publishedAt DateTime?
   scheduledAt DateTime?
   deletedAt   DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([scheduledAt])
   @@index([deletedAt])
@@ -136,11 +136,11 @@ model Content {
 }
 
 model Tag {
-  id        String       @id @default(cuid())
-  name      String
-  slug      String       @unique
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
 
-  contents  ContentTag[]
+  contents ContentTag[]
 
   createdAt DateTime @default(now())
 }
@@ -149,33 +149,33 @@ model ContentTag {
   contentId String
   tagId     String
 
-  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
-  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([contentId, tagId])
 }
 
 model Comment {
-  id        String  @id @default(cuid())
-  content   String
+  id      String @id @default(cuid())
+  content String
 
-  userId    String
-  user      User    @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  postId    String
-  post      Content @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+  post   Content @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }
 
 model Like {
-  id        String  @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId    String
-  user      User    @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  postId    String
-  post      Content @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+  post   Content @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -183,13 +183,13 @@ model Like {
 }
 
 model Favorite {
-  id        String  @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId    String
-  user      User    @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  postId    String
-  post      Content @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+  post   Content @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -207,7 +207,7 @@ model FileAsset {
   status      ContentStatus @default(PENDING)
 
   uploadedById String
-  uploadedBy   User @relation(fields: [uploadedById], references: [id])
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
 
   deletedAt DateTime?
 
@@ -218,15 +218,15 @@ model FileAsset {
 }
 
 model Test {
-  id          String @id @default(cuid())
-  title       String
-  slug        String @unique
-  description String?
-  image       String?
-  duration    String?
+  id            String        @id @default(cuid())
+  title         String
+  slug          String        @unique
+  description   String?
+  image         String?
+  duration      String?
   questionCount Int?
-  iframeUrl   String?
-  status      ContentStatus @default(PUBLISHED)
+  iframeUrl     String?
+  status        ContentStatus @default(PUBLISHED)
 
   seoTitle       String?
   seoDescription String?
@@ -275,7 +275,7 @@ model TestOption {
 }
 
 model TestResult {
-  id                String @id @default(cuid())
+  id                String  @id @default(cuid())
   totalScore        Int
   maxScore          Int
   resultLabel       String
@@ -292,37 +292,37 @@ model TestResult {
 }
 
 model Poll {
-  id        String       @id @default(cuid())
-  question  String
-  status    ContentStatus @default(PUBLISHED)
+  id       String        @id @default(cuid())
+  question String
+  status   ContentStatus @default(PUBLISHED)
 
-  options   PollOption[]
+  options PollOption[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model PollOption {
-  id      String @id @default(cuid())
-  text    String
-  votes   Int    @default(0)
+  id    String @id @default(cuid())
+  text  String
+  votes Int    @default(0)
 
-  pollId  String
-  poll    Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId String
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
 }
 
 model Message {
-  id         String   @id @default(cuid())
-  message    String
-  isRead     Boolean  @default(false)
+  id      String  @id @default(cuid())
+  message String
+  isRead  Boolean @default(false)
 
-  senderId   String
-  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId String
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id])
 
   receiverId String
-  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id])
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([senderId, receiverId])
   @@index([receiverId, isRead])
@@ -358,27 +358,28 @@ enum NotificationType {
 }
 
 model SiteSettings {
-  id                      String   @id @default("default")
-  siteName                String   @default("TürkPDR")
-  logoUrl                 String?
-  faviconUrl              String?
-  metaTitle               String?
-  metaDescription         String?
-  contactEmail            String?
-  contactPhone            String?
-  instagramUrl            String?
-  twitterUrl              String?
-  linkedinUrl             String?
-  youtubeUrl              String?
-  footerText              String?
-  googleAnalyticsId       String?
-  googleSearchConsoleCode String?
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  id                       String   @id @default("default")
+  siteName                 String   @default("TürkPDR")
+  logoUrl                  String?
+  faviconUrl               String?
+  metaTitle                String?
+  metaDescription          String?
+  contactEmail             String?
+  contactPhone             String?
+  instagramUrl             String?
+  twitterUrl               String?
+  linkedinUrl              String?
+  youtubeUrl               String?
+  footerText               String?
+  googleAnalyticsId        String?
+  googleSearchConsoleCode  String?
+  googleAdsensePublisherId String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 }
 
 model MediaAsset {
-  id           String   @id @default(cuid())
+  id           String  @id @default(cuid())
   title        String?
   fileName     String
   fileUrl      String
@@ -386,7 +387,7 @@ model MediaAsset {
   fileSize     Int
   category     String
   uploadedById String?
-  uploadedBy   User?    @relation(fields: [uploadedById], references: [id])
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id])
 
   deletedAt DateTime?
 
@@ -399,18 +400,18 @@ model MediaAsset {
 }
 
 model ActivityLog {
-  id          String   @id @default(cuid())
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id])
+  id     String  @id @default(cuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
   action      String
   entityType  String
   entityId    String?
   description String
 
-  metadata    Json?
+  metadata Json?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([createdAt])
   @@index([entityType])
@@ -454,11 +455,11 @@ model DictionaryTerm {
   canonicalUrl   String?
   noIndex        Boolean @default(false)
 
-  scheduledAt    DateTime?
-  deletedAt      DateTime?
+  scheduledAt DateTime?
+  deletedAt   DateTime?
 
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([scheduledAt])
   @@index([deletedAt])

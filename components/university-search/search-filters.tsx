@@ -240,7 +240,7 @@ export default function SearchFilters({
   };
 
   return (
-    <div className="bg-white border-b border-gray-100 relative z-10">
+    <div className="bg-white border-b border-gray-100 relative z-10 print:hidden">
       {/* ── Ana Satır ─────────────────────────────────────────────── */}
       <div className="px-5 py-3 flex flex-wrap items-end gap-3">
 

@@ -24,11 +24,23 @@ type SettingsInput = {
   footerText?: string | null;
   googleAnalyticsId?: string | null;
   googleSearchConsoleCode?: string | null;
+  googleAdsensePublisherId?: string | null;
 };
 
 function normalizeOptional(value: string | null | undefined): string | null {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
+}
+
+/** Accepts "1234567890", "pub-1234567890" or "ca-pub-1234567890" and stores the canonical "ca-pub-..." form. */
+function normalizeAdsensePublisherId(
+  value: string | null | undefined
+): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("ca-pub-")) return trimmed;
+  if (trimmed.startsWith("pub-")) return `ca-${trimmed}`;
+  return `ca-pub-${trimmed}`;
 }
 
 function validateSettingsInput(body: SettingsInput): string | null {
@@ -91,6 +103,7 @@ export async function PATCH(request: Request) {
     footerText?: string | null;
     googleAnalyticsId?: string | null;
     googleSearchConsoleCode?: string | null;
+    googleAdsensePublisherId?: string | null;
   } = {};
 
   if (body.siteName !== undefined) updateData.siteName = body.siteName.trim();
@@ -133,6 +146,11 @@ export async function PATCH(request: Request) {
   if (body.googleSearchConsoleCode !== undefined) {
     updateData.googleSearchConsoleCode = normalizeOptional(
       body.googleSearchConsoleCode
+    );
+  }
+  if (body.googleAdsensePublisherId !== undefined) {
+    updateData.googleAdsensePublisherId = normalizeAdsensePublisherId(
+      body.googleAdsensePublisherId
     );
   }
 

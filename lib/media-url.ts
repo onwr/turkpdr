@@ -1,5 +1,3 @@
-import { getSiteBaseUrl } from "@/lib/seo/metadata";
-
 const UPLOAD_SEGMENT = /\/uploads\/(?:images|files|videos)\/[^/\s"'<>#?]+/g;
 const UPLOAD_PATH = /^\/uploads\/(?:images|files|videos)\//;
 
@@ -17,7 +15,7 @@ export function normalizeMediaUrl(
 ): string | null {
   if (!url?.trim()) return null;
 
-  let value = url.trim();
+  const value = url.trim();
 
   if (/https?:\/\//i.test(value) || value.includes("/uploads/")) {
     const stripped = value.replace(/https?:\/\/[^/]+/gi, "");
@@ -52,24 +50,17 @@ export function normalizeMediaUrl(
   return value;
 }
 
-/** Public absolute URL for uploaded files; external URLs pass through. */
+/**
+ * Public URL for uploaded files, as a relative `/uploads/...` path.
+ * External URLs pass through unchanged. Kept relative so it resolves
+ * correctly against whatever origin actually serves the site (next/image
+ * only allows external hosts listed in next.config.ts remotePatterns, and
+ * a hardcoded production host would 404 on any other environment).
+ * For contexts that need an absolute URL (OG/social meta tags), use
+ * `toAbsoluteMediaUrl` from lib/seo/metadata.ts on the result.
+ */
 export function resolveMediaUrl(url: string | null | undefined): string | null {
-  const normalized = normalizeMediaUrl(url);
-  if (!normalized) return null;
-
-  if (UPLOAD_PATH.test(normalized)) {
-    return `${getSiteBaseUrl()}${normalized}`;
-  }
-
-  if (/^https?:\/\//i.test(normalized)) {
-    return normalized;
-  }
-
-  if (normalized.startsWith("/")) {
-    return `${getSiteBaseUrl()}${normalized}`;
-  }
-
-  return normalized;
+  return normalizeMediaUrl(url);
 }
 
 export function resolveMediaUrlWithFallback(
@@ -107,18 +98,15 @@ export function normalizeRichTextMediaUrls(
   return result;
 }
 
+/**
+ * Normalizes uploaded-media URLs inside rich text content to relative
+ * `/uploads/...` paths, so they render correctly on whatever origin serves
+ * the page (same reasoning as `resolveMediaUrl`).
+ */
 export function resolveRichTextMediaUrls(
   html: string | null | undefined
 ): string {
-  if (!html?.trim()) return html ?? "";
-
-  const baseUrl = getSiteBaseUrl();
-
-  return html.replace(
-    /(\s(?:src|href)\s*=\s*["'])(\/uploads\/[^"']+)(['"])/gi,
-    (_full, prefix: string, path: string, suffix: string) =>
-      `${prefix}${baseUrl}${path}${suffix}`
-  );
+  return normalizeRichTextMediaUrls(html) ?? "";
 }
 
 export function normalizeContentMediaInput<T extends {

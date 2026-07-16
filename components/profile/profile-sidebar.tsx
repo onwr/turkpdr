@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { getPublishedContentHref } from "@/lib/account/content-url";
 import type { PopularContent, UserProfile } from "@/types/profile";
 
 function formatViewCount(count: number): string {
@@ -110,7 +111,10 @@ export function ProfileSidebar({
           {popularContent.map((item, index) => (
             <li key={item.id}>
               <Link
-                href={`/makaleler/${item.slug}`}
+                href={
+                  getPublishedContentHref(item.contentType, item.slug) ??
+                  `/makaleler/${item.slug}`
+                }
                 className="group flex gap-3 rounded-xl p-2 transition-colors hover:bg-slate-50"
               >
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-brand-blue/10 text-xs font-bold text-brand-blue">

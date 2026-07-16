@@ -100,7 +100,12 @@ export function generateSafeFileName(
   const slug =
     slugify(baseName, { lower: true, strict: true, locale: "tr" }) || "dosya";
   const extension = MIME_TO_EXTENSION[mimeType];
-  return `${slug}.${extension}`;
+  // Always unique, not just on collision: filenames aren't content-addressed,
+  // so two different uploads sharing an original name (or a name reused after
+  // a deleted file) would otherwise resolve to the same URL and serve stale
+  // cached bytes for the wrong image.
+  const uniqueSuffix = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  return `${slug}-${uniqueSuffix}.${extension}`;
 }
 
 async function fileExists(filePath: string): Promise<boolean> {

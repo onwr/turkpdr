@@ -47,6 +47,7 @@ function toFormState(
     footerText: settings.footerText ?? "",
     googleAnalyticsId: settings.googleAnalyticsId ?? "",
     googleSearchConsoleCode: settings.googleSearchConsoleCode ?? "",
+    googleAdsensePublisherId: settings.googleAdsensePublisherId ?? "",
   };
 }
 
@@ -111,6 +112,7 @@ export function SettingsPage() {
       footerText: form.footerText.trim() || null,
       googleAnalyticsId: form.googleAnalyticsId.trim() || null,
       googleSearchConsoleCode: form.googleSearchConsoleCode.trim() || null,
+      googleAdsensePublisherId: form.googleAdsensePublisherId.trim() || null,
     };
 
     try {
@@ -372,6 +374,35 @@ export function SettingsPage() {
                   updateForm("googleSearchConsoleCode", e.target.value)
                 }
                 placeholder="google-site-verification kodu"
+                className="rounded-xl"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="size-4 text-brand-blue" />
+              Reklamlar
+            </CardTitle>
+            <CardDescription>
+              Google AdSense entegrasyonu — Auto Ads ile reklamlar sayfaya
+              otomatik yerleştirilir
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="googleAdsensePublisherId">
+                Google AdSense Yayıncı ID
+              </Label>
+              <Input
+                id="googleAdsensePublisherId"
+                value={form.googleAdsensePublisherId}
+                onChange={(e) =>
+                  updateForm("googleAdsensePublisherId", e.target.value)
+                }
+                placeholder="pub-XXXXXXXXXXXXXXXX"
                 className="rounded-xl"
               />
             </div>

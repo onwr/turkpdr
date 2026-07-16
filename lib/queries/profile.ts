@@ -139,6 +139,7 @@ export async function getProfilePosts(userId: string): Promise<ProfilePost[]> {
     excerpt: c.summary ?? "",
     category: c.category?.name ?? "Genel",
     type: contentTypeToPostType(c.type),
+    contentType: c.type,
     slug: c.slug,
     date: formatDateTR(c.publishedAt ?? c.createdAt),
     likeCount: c._count.likes,
@@ -183,6 +184,7 @@ export async function getProfileFavorites(
       id: f.id,
       title: f.post.title,
       type: contentTypeToPostType(f.post.type),
+      contentType: f.post.type,
       slug: f.post.slug,
       savedAt: formatDateTR(f.createdAt),
     }));
@@ -202,6 +204,7 @@ export async function getProfilePopularContent(
     id: c.id,
     title: c.title,
     type: c.type === "NEWS" ? "Haber" : "Makale",
+    contentType: c.type,
     slug: c.slug,
     viewCount: c.views,
   }));

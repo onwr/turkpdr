@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ArticleDetailPage } from "@/components/article/article-detail-page";
 import { getCurrentUser } from "@/lib/auth";
+import { incrementContentViews } from "@/lib/queries/articles";
 import { getArticleInteractionState } from "@/lib/queries/interactions";
 import {
   getPublishedVideoSlugs,
@@ -57,6 +58,8 @@ export default async function Page({ params }: PageProps) {
   if (!data) {
     notFound();
   }
+
+  await incrementContentViews(data.article.id);
 
   const interaction = await getArticleInteractionState(
     data.article.id,

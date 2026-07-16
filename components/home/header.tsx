@@ -54,7 +54,7 @@ export function Header({ branding, user = null }: HeaderProps) {
   const logoUrl = branding?.logoUrl || "/logo.png";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-white/80 backdrop-blur-xl dark:bg-background/80">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-white/80 backdrop-blur-xl print:hidden dark:bg-background/80">
       <div className="mx-auto max-w-[1700px] px-6 lg:px-10">
         <div className="flex h-16 items-center justify-between gap-3">
           <Link

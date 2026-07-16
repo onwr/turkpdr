@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Calendar, Heart, Share2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { getPublishedContentHref } from "@/lib/account/content-url";
 import type { ProfilePost } from "@/types/profile";
 
 type ProfilePostsProps = {
@@ -31,13 +32,18 @@ export function ProfilePosts({ posts, isOwnProfile = false }: ProfilePostsProps)
 
   return (
     <div className="space-y-4">
-      {posts.map((post) => (
+      {posts.map((post) => {
+        const href =
+          getPublishedContentHref(post.contentType, post.slug) ??
+          `/makaleler/${post.slug}`;
+
+        return (
         <article
           key={post.id}
           className="group flex gap-4 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50 transition-all hover:border-brand-blue/20 hover:shadow-md sm:p-5"
         >
           <Link
-            href={`/makaleler/${post.slug}`}
+            href={href}
             className="relative block size-20 shrink-0 overflow-hidden rounded-xl sm:size-28"
           >
             <Image
@@ -60,9 +66,7 @@ export function ProfilePosts({ posts, isOwnProfile = false }: ProfilePostsProps)
             </div>
 
             <h3 className="font-semibold leading-snug text-brand-navy transition-colors group-hover:text-brand-blue">
-              <Link
-                href={`/makaleler/${post.slug}`}
-              >
+              <Link href={href}>
                 {post.title}
               </Link>
             </h3>
@@ -83,7 +87,8 @@ export function ProfilePosts({ posts, isOwnProfile = false }: ProfilePostsProps)
             </div>
           </div>
         </article>
-      ))}
+        );
+      })}
     </div>
   );
 }

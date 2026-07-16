@@ -16,6 +16,7 @@ export type SiteSettingsData = {
   footerText: string | null;
   googleAnalyticsId: string | null;
   googleSearchConsoleCode: string | null;
+  googleAdsensePublisherId: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -35,6 +36,7 @@ export type SiteSettingsFormState = {
   footerText: string;
   googleAnalyticsId: string;
   googleSearchConsoleCode: string;
+  googleAdsensePublisherId: string;
 };
 
 export const defaultSiteSettingsFormState: SiteSettingsFormState = {
@@ -55,4 +57,5 @@ export const defaultSiteSettingsFormState: SiteSettingsFormState = {
     "Türkiye'nin en kapsamlı psikolojik danışmanlık ve rehberlik platformu.",
   googleAnalyticsId: "",
   googleSearchConsoleCode: "",
+  googleAdsensePublisherId: "",
 };

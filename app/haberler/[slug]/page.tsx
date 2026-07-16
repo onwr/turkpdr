@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   getNewsPageData,
   getPublishedNewsSlugs,
+  incrementContentViews,
 } from "@/lib/queries/articles";
 import { getArticleInteractionState } from "@/lib/queries/interactions";
 import { buildArticleMetadata } from "@/lib/seo/article-metadata";
@@ -57,6 +58,8 @@ export default async function Page({ params }: PageProps) {
   if (!data) {
     notFound();
   }
+
+  await incrementContentViews(data.article.id);
 
   const interaction = await getArticleInteractionState(
     data.article.id,

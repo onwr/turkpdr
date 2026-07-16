@@ -28,6 +28,7 @@ export function serializeSiteSettings(settings: {
   footerText: string | null;
   googleAnalyticsId: string | null;
   googleSearchConsoleCode: string | null;
+  googleAdsensePublisherId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): SiteSettingsData {
@@ -47,6 +48,7 @@ export function serializeSiteSettings(settings: {
     footerText: settings.footerText,
     googleAnalyticsId: settings.googleAnalyticsId,
     googleSearchConsoleCode: settings.googleSearchConsoleCode,
+    googleAdsensePublisherId: settings.googleAdsensePublisherId,
     createdAt: settings.createdAt.toISOString(),
     updatedAt: settings.updatedAt.toISOString(),
   };

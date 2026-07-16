@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
+import { SiteAdsense } from "@/components/home/site-adsense";
 import { SiteTracking } from "@/components/home/site-tracking";
 import { resolveSiteIconUrl } from "@/lib/site-branding";
 import { getSiteSettings } from "@/lib/queries/settings";
@@ -79,6 +80,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <SiteTracking />
+        <SiteAdsense />
       </body>
     </html>
   );
